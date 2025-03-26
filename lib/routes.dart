@@ -1,3 +1,4 @@
+import 'package:crudtutorial/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'screens/login_screen.dart';
@@ -23,7 +24,10 @@ class Routes {
 
       case AppRoutes.register:
         return getRoute(widget: const RegisterPage());
-
+      
+      case AppRoutes.homeScreen:
+        return getRoute(widget: const HomePage());
+        
       /// An invalid route. User shouldn't see this,
       /// it's for debugging purpose only.
       default:

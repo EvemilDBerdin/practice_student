@@ -1,4 +1,5 @@
-import 'package:crudtutorial/api/users/users.dart';
+import 'package:crudtutorial/api/users.dart';
+import 'package:crudtutorial/values/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:crudtutorial/utils/helpers/snackbar_helper.dart';
 
@@ -25,34 +26,37 @@ class _RegisterPageState extends State<RegisterPage> {
   late final TextEditingController emailController;
   late final TextEditingController passwordController;
   late final TextEditingController confirmPasswordController;
-  String? selectedGender;
+  String? selectedPosition;
   bool isLoading = false;
 
   final ValueNotifier<bool> passwordNotifier = ValueNotifier(true);
   final ValueNotifier<bool> confirmPasswordNotifier = ValueNotifier(true);
   final ValueNotifier<bool> fieldValidNotifier = ValueNotifier(false);
 
-  register(String name, String email, String password, String role) async {
+  register() async {
     setState(() => isLoading = true);
-    var response = await ApiService.registerUser(name, email, password, role);
-    await Future.delayed(Duration(seconds: 5));
+    fieldValidNotifier.value = false;
+    print('test');
+    var response = await ApiService.registerUser(nameController.text, emailController.text, passwordController.text, selectedPosition!); 
     setState(() => isLoading = false);
 
     if(response['status_code'] == 201){
-      SnackbarHelper.showSnackBar(response['message'], backgroundColor: Colors.green);
+      SnackbarHelper.showSnackBar(response['message'], backgroundColor: AppColors.successResponse);
+      NavigationHelper.pushReplacementNamed(AppRoutes.login);
     }
     else {
-      SnackbarHelper.showSnackBar(response['message'], backgroundColor: Colors.red);
+      SnackbarHelper.showSnackBar(response['message'], backgroundColor: AppColors.errorResponse); 
+      Future.delayed(const Duration(milliseconds: 2500),(){
+        fieldValidNotifier.value = true;
+      }); 
     }
   }
 
   void initializeControllers() {
     nameController = TextEditingController()..addListener(controllerListener);
     emailController = TextEditingController()..addListener(controllerListener);
-    passwordController = TextEditingController()
-      ..addListener(controllerListener);
-    confirmPasswordController = TextEditingController()
-      ..addListener(controllerListener);
+    passwordController = TextEditingController()..addListener(controllerListener);
+    confirmPasswordController = TextEditingController()..addListener(controllerListener);
   }
 
   void disposeControllers() {
@@ -102,8 +106,7 @@ class _RegisterPageState extends State<RegisterPage> {
         children: [
           if (isLoading)
             Positioned.fill(
-              child: Container(
-                // color: Colors.black.withOpacity(0.5),
+              child: Container( 
                 color: Colors.white,
                 child: Center(child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
@@ -117,7 +120,7 @@ class _RegisterPageState extends State<RegisterPage> {
               const GradientBackground(
                 children: [
                   Text(AppStrings.register, style: AppTheme.titleLarge),
-                  SizedBox(height: 6),
+                  SizedBox(height: 4),
                   Text(AppStrings.createYourAccount, style: AppTheme.bodySmall),
                 ],
               ),
@@ -261,30 +264,30 @@ class _RegisterPageState extends State<RegisterPage> {
                       RadioListTile(
                         title: Text("Admin"),
                         value: "admin",
-                        groupValue: selectedGender,
+                        groupValue: selectedPosition,
                         onChanged: (value) {
                           setState(() {
-                            selectedGender = value.toString();
+                            selectedPosition = value.toString();
                           });
                         },
                       ),
                       RadioListTile(
                         title: Text("Supervisor"),
                         value: "supervisor",
-                        groupValue: selectedGender,
+                        groupValue: selectedPosition,
                         onChanged: (value) {
                           setState(() {
-                            selectedGender = value.toString();
+                            selectedPosition = value.toString();
                           });
                         },
                       ),
                       RadioListTile(
                         title: Text("Staff"),
                         value: "staff",
-                        groupValue: selectedGender,
+                        groupValue: selectedPosition,
                         onChanged: (value) {
                           setState(() {
-                            selectedGender = value.toString();
+                            selectedPosition = value.toString();
                           });
                         },
                       ),
@@ -296,20 +299,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         builder: (_, isValid, __) {
                           return FilledButton(
                             onPressed: isValid || !isLoading
-                                ? () {
-                                  setState((){
-                                    isLoading = true;
-                                  });
-                                    register(
-                                        nameController.text,
-                                        emailController.text,
-                                        passwordController.text,
-                                        selectedGender!).then((_){
-                                          setState((){
-                                            isLoading = false;
-                                          });
-                                        });
-                                  }
+                                ? () async { 
+                                  await register();
+                                }
                                 : null, 
                             child: const Text(AppStrings.register),
                           );
@@ -319,6 +311,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
               ),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -327,9 +320,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     style: AppTheme.bodySmall.copyWith(color: Colors.black),
                   ),
                   TextButton(
-                    onPressed: () => NavigationHelper.pushReplacementNamed(
-                      AppRoutes.login,
-                    ),
+                    onPressed: () => NavigationHelper.pushReplacementNamed(AppRoutes.login),
                     child: const Text(AppStrings.login),
                   ),
                 ],

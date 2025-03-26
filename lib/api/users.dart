@@ -1,13 +1,13 @@
 import 'package:http/http.dart' as http;
+import 'package:crudtutorial/values/app_constants.dart';
 import 'dart:convert';
 
-class ApiService {
-  static const String baseUrl = "http://192.168.30.138/practice_api/auth.php";
-
-  static Future<Map<String, dynamic>> registerUser(
-      String name, String email, String password, String role) async {
+class ApiService { 
+  
+  static Future<Map<String, dynamic>> registerUser(String name, String email, String password, String role) async {
+    print('test2');
     final response = await http.post(
-      Uri.parse(baseUrl),
+      Uri.parse(AppConstants.authUrl),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         "action": "register",
@@ -16,15 +16,14 @@ class ApiService {
         "password": password,
         "role": role
       }),
-    );
-
+    ); 
+    print('test3');
     return jsonDecode(response.body);
   }
 
-  static Future<Map<String, dynamic>> loginUser(
-      String email, String password) async {
-    var response = await http.post(
-      Uri.parse(baseUrl),
+  static Future<Map<String, dynamic>> loginUser(String email, String password) async {
+    final response = await http.post(
+      Uri.parse(AppConstants.authUrl),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         "action": "login",
@@ -34,5 +33,7 @@ class ApiService {
     ); 
     return jsonDecode(response.body);
   }
+
+
 }
 
